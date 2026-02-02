@@ -1,0 +1,26 @@
+@model HomeCraft.Data.Models.Topic
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 overflow-hidden">
+                <div class="bg-danger text-white p-5 text-center">
+                    <i class="bi bi-trash3-fill display-1 mb-3"></i>
+                    <h2 class="fw-bold">Delete This Topic?</h2>
+                    <p class="mb-0 opacity-75">This action is permanent and cannot be undone.</p>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <h5 class="text-dark mb-4 px-3">"@Model.Title"</h5>
+
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-danger btn-lg shadow">Yes, Delete Forever</button>
+                            <a asp-action="Index" class="btn btn-light border">No, Keep it</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

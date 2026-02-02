@@ -1,0 +1,77 @@
+@model HomeCraft.Data.Models.Topic
+@using HomeCraft.Data.Models
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = Model.Title;
+    var likes = Model.Reviews.Count(r => r.IsLiked);
+    var dislikes = Model.Reviews.Count(r => !r.IsLiked);
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 rounded-3">
+                @if (!string.IsNullOrEmpty(Model.MediaUrl))
+                {
+                    <img src="@Model.MediaUrl" class="card-img-top rounded-top-3" style="max-height: 500px; object-fit: cover;" />
+                }
+
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <h1 class="display-4 fw-bold text-dark mb-2">@Model.Title</h1>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-secondary py-2 px-3">
+                                <i class="bi bi-person-fill"></i> Posted by @(Model.User?.FirstName + Model.User?.LastName ?? "Expert")
+                            </span>
+                            <span class="text-muted small">
+                                <i class="bi bi-calendar3"></i> @Model.CreatedAt.ToString("MMMM dd, yyyy")
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="fs-5 text-dark mb-5" style="white-space: pre-line; line-height: 1.8;">
+                        @Model.Description
+                    </div>
+
+                    <div class="bg-light p-4 rounded-3 text-center border">
+                        <h4 class="mb-4 fw-bold">Was this guide helpful?</h4>
+                        <div class="d-flex justify-content-center gap-4">
+                            <form asp-action="Rate" method="post">
+                                <input type="hidden" name="topicId" value="@Model.Id" />
+                                <input type="hidden" name="isLike" value="true" />
+                                <button type="submit" class="btn btn-success btn-lg px-5 py-3 shadow">
+                                    <i class="bi bi-hand-thumbs-up-fill me-2"></i> Useful (@likes)
+                                </button>
+                            </form>
+
+                            <form asp-action="Rate" method="post">
+                                <input type="hidden" name="topicId" value="@Model.Id" />
+                                <input type="hidden" name="isLike" value="false" />
+                                <button type="submit" class="btn btn-danger btn-lg px-5 py-3 shadow">
+                                    <i class="bi bi-hand-thumbs-down-fill me-2"></i> Not Really (@dislikes)
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 d-flex justify-content-between align-items-center">
+                        <a asp-action="Index" class="btn btn-outline-dark px-4">
+                            <i class="bi bi-arrow-left"></i> Back to All Topics
+                        </a>
+
+                        @if (UserManager.GetUserId(User) == Model.UserId || User.IsInRole("Admin"))
+                        {
+                            <div class="btn-group">
+                                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning text-white">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
