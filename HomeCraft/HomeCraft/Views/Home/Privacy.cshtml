@@ -1,6 +1,60 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-dark text-white py-4 text-center">
+                    <i class="bi bi-shield-lock fs-1 d-block mb-2"></i>
+                    <h1 class="fw-bold mb-0">Privacy Policy</h1>
+                    <p class="text-white-50 mt-2 mb-0">Last Updated: February 2026</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <p class="lead text-muted mb-5">
+                        At <strong>HomeCraft</strong>, we value your trust and are committed to protecting your personal data. This policy explains how we handle your information when you use our repair forum.
+                    </p>
+
+                    <h4 class="fw-bold text-primary"><i class="bi bi-1-circle me-2"></i>Information We Collect</h4>
+                    <p>To provide a functional community experience, we collect the following:</p>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item"><i class="bi bi-check2-circle text-success me-2"></i><strong>Account Data:</strong> Your name, email address, and encrypted password provided during registration.</li>
+                        <li class="list-group-item"><i class="bi bi-check2-circle text-success me-2"></i><strong>Community Content:</strong> Repair topics, descriptions, images (URLs), and likes/dislikes you post.</li>
+                        <li class="list-group-item"><i class="bi bi-check2-circle text-success me-2"></i><strong>Logs:</strong> Technical data such as IP addresses and browser types for security purposes.</li>
+                    </ul>
+
+                    <h4 class="fw-bold text-primary"><i class="bi bi-2-circle me-2"></i>How We Use Your Data</h4>
+                    <p>We use your information to:</p>
+                    <ul>
+                        <li>Identify you as the author of your repair guides.</li>
+                        <li>Personalize your experience and manage your account.</li>
+                        <li>Maintain the security and integrity of the forum.</li>
+                    </ul>
+
+                    <div class="alert alert-info border-0 shadow-sm my-4">
+                        <h5 class="alert-heading fw-bold"><i class="bi bi-eye-fill me-2"></i>Public Visibility</h5>
+                        <hr>
+                        <p class="mb-0">Please note: Your <strong>First Name</strong> and any <strong>Topics</strong> you create are visible to other registered users of the HomeCraft community.</p>
+                    </div>
+
+                    <h4 class="fw-bold text-primary"><i class="bi bi-3-circle me-2"></i>Data Retention & Deletion</h4>
+                    <p>
+                        You have the right to manage your data. If you choose to delete a topic, it is permanently removed from our active database. If you wish to delete your entire account, please contact an administrator.
+                    </p>
+
+                    <h4 class="fw-bold text-primary"><i class="bi bi-4-circle me-2"></i>Cookies</h4>
+                    <p>
+                        We use essential cookies to keep you logged in and remember your preferences. These are necessary for the website to function correctly.
+                    </p>
+
+                    <div class="mt-5 pt-4 border-top text-center">
+                        <p class="text-muted">If you have any questions about this policy, please reach out to the HomeCraft Admin team.</p>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary px-4">Return to Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

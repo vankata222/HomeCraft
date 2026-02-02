@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using HomeCraft.Data;
 using HomeCraft.Data.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace HomeCraft;
 

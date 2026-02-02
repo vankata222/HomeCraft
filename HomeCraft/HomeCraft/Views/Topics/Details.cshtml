@@ -1,70 +1,47 @@
 @model HomeCraft.Data.Models.Topic
 @using HomeCraft.Data.Models
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @inject UserManager<ApplicationUser> UserManager
 
 @{
     ViewData["Title"] = Model.Title;
-    var likes = Model.Reviews.Count(r => r.IsLiked);
-    var dislikes = Model.Reviews.Count(r => !r.IsLiked);
+    // Calculate totals from the separate Votes collection
+    var likes = Model.Votes?.Count(v => v.IsLiked) ?? 0;
+    var dislikes = Model.Votes?.Count(v => !v.IsLiked) ?? 0;
 }
 
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <div class="card shadow-lg border-0 rounded-3">
+            
+            @* --- PART 1: THE MAIN CONTENT --- *@
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
                 @if (!string.IsNullOrEmpty(Model.MediaUrl))
                 {
-                    <img src="@Model.MediaUrl" class="card-img-top rounded-top-3" style="max-height: 500px; object-fit: cover;" />
+                    <img src="@Model.MediaUrl" class="card-img-top" style="max-height: 450px; object-fit: cover;" />
                 }
-
                 <div class="card-body p-5">
-                    <div class="mb-4">
-                        <h1 class="display-4 fw-bold text-dark mb-2">@Model.Title</h1>
-                        <div class="d-flex align-items-center gap-3">
-                            <span class="badge bg-secondary py-2 px-3">
-                                <i class="bi bi-person-fill"></i> Posted by @(Model.User?.FirstName + Model.User?.LastName ?? "Expert")
-                            </span>
-                            <span class="text-muted small">
-                                <i class="bi bi-calendar3"></i> @Model.CreatedAt.ToString("MMMM dd, yyyy")
-                            </span>
-                        </div>
+                    <h1 class="display-5 fw-bold text-dark">@Model.Title</h1>
+                    <div class="d-flex align-items-center gap-3 my-4">
+                        <span class="badge bg-primary-subtle text-primary py-2 px-3 rounded-pill">
+                            <i class="bi bi-person-circle me-1"></i> By @(Model.User?.FirstName ?? "Expert")
+                        </span>
+                        <span class="text-muted small">
+                            <i class="bi bi-calendar3 me-1"></i> @Model.CreatedAt.ToString("MMM dd, yyyy")
+                        </span>
                     </div>
 
-                    <div class="fs-5 text-dark mb-5" style="white-space: pre-line; line-height: 1.8;">
+                    <div class="fs-5 text-dark mb-5" style="white-space: pre-line; line-height: 1.7;">
                         @Model.Description
                     </div>
 
-                    <div class="bg-light p-4 rounded-3 text-center border">
-                        <h4 class="mb-4 fw-bold">Was this guide helpful?</h4>
-                        <div class="d-flex justify-content-center gap-4">
-                            <form asp-action="Rate" method="post">
-                                <input type="hidden" name="topicId" value="@Model.Id" />
-                                <input type="hidden" name="isLike" value="true" />
-                                <button type="submit" class="btn btn-success btn-lg px-5 py-3 shadow">
-                                    <i class="bi bi-hand-thumbs-up-fill me-2"></i> Useful (@likes)
-                                </button>
-                            </form>
-
-                            <form asp-action="Rate" method="post">
-                                <input type="hidden" name="topicId" value="@Model.Id" />
-                                <input type="hidden" name="isLike" value="false" />
-                                <button type="submit" class="btn btn-danger btn-lg px-5 py-3 shadow">
-                                    <i class="bi bi-hand-thumbs-down-fill me-2"></i> Not Really (@dislikes)
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div class="mt-5 d-flex justify-content-between align-items-center">
-                        <a asp-action="Index" class="btn btn-outline-dark px-4">
-                            <i class="bi bi-arrow-left"></i> Back to All Topics
+                    <div class="d-flex justify-content-between align-items-center border-top pt-4">
+                        <a asp-action="Index" class="btn btn-link text-decoration-none text-muted">
+                            <i class="bi bi-arrow-left"></i> Back to Forum
                         </a>
-
                         @if (UserManager.GetUserId(User) == Model.UserId || User.IsInRole("Admin"))
                         {
-                            <div class="btn-group">
+                            <div class="btn-group shadow-sm">
                                 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning text-white">Edit</a>
                                 <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
                             </div>
@@ -72,6 +49,83 @@
                     </div>
                 </div>
             </div>
+
+            @* --- PART 2: THE VOTING BAR (One per user) --- *@
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-4 text-center">
+                    <h5 class="fw-bold mb-3">Was this guide helpful?</h5>
+                    <div class="d-flex justify-content-center gap-3">
+                        <form asp-action="Rate" method="post">
+                            <input type="hidden" name="topicId" value="@Model.Id" />
+                            <input type="hidden" name="isLiked" value="true" />
+                            <button type="submit" class="btn btn-success btn-lg px-4 rounded-pill shadow-sm">
+                                <i class="bi bi-hand-thumbs-up-fill me-2"></i> Yes (@likes)
+                            </button>
+                        </form>
+                        <form asp-action="Rate" method="post">
+                            <input type="hidden" name="topicId" value="@Model.Id" />
+                            <input type="hidden" name="isLiked" value="false" />
+                            <button type="submit" class="btn btn-outline-danger btn-lg px-4 rounded-pill shadow-sm">
+                                <i class="bi bi-hand-thumbs-down-fill me-2"></i> No (@dislikes)
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            @* --- PART 3: THE COMMENTS SECTION (Multiple per user) --- *@
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    <h4 class="fw-bold mb-4"><i class="bi bi-chat-dots-fill text-primary me-2"></i>Comments (@(Model.Comments?.Count ?? 0))</h4>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form asp-action="PostComment" method="post" class="mb-5">
+                            <input type="hidden" name="topicId" value="@Model.Id" />
+                            <div class="mb-3">
+                                <textarea name="content" class="form-control bg-light border-0" rows="3" required placeholder="Write a comment..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary px-4 rounded-pill">Post Comment</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-light border text-center mb-5">
+                            Please <a asp-area="Identity" asp-page="/Account/Login">Login</a> to join the discussion.
+                        </div>
+                    }
+
+                    <div class="comment-list">
+                        @if (Model.Comments != null && Model.Comments.Any())
+                        {
+                            @foreach (var comment in Model.Comments.OrderByDescending(c => c.CreatedAt))
+                            {
+                                <div class="d-flex mb-4">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                                            @(!string.IsNullOrEmpty(comment.User?.FirstName) ? comment.User.FirstName[0].ToString().ToUpper() : "U")
+                                        </div>
+                                    </div>
+                                    <div class="ms-3 w-100">
+                                        <div class="bg-light p-3 rounded-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <h6 class="mb-0 fw-bold">@comment.User?.FirstName @comment.User?.LastName</h6>
+                                                <small class="text-muted">@comment.CreatedAt.ToString("g")</small>
+                                            </div>
+                                            <p class="mb-0 text-dark">@comment.Content</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-center text-muted py-4">No comments yet. Start the conversation!</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

@@ -2,7 +2,29 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container py-5">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+            <h1 class="display-3 fw-bold text-dark mb-4">Master Your <span class="text-primary">Home Repairs</span></h1>
+            <p class="lead text-secondary mb-5">
+                Join the HomeCraft community. Share your expertise, learn from others, 
+                and fix your home like a professional.
+            </p>
+            <div class="d-grid gap-3 d-md-flex justify-content-md-start">
+                <a asp-controller="Topics" asp-action="Index" class="btn btn-primary btn-lg px-5 py-3 shadow-sm rounded-pill">
+                    Browse Forum
+                </a>
+                <a asp-controller="Topics" asp-action="Create" class="btn btn-outline-dark btn-lg px-5 py-3 rounded-pill">
+                    Share a Guide
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="p-5 bg-light border rounded-5 text-center shadow-sm">
+                <i class="bi bi-tools display-1 text-primary mb-4"></i>
+                <h2 class="fw-bold">Why HomeCraft?</h2>
+                <p class="text-muted">Community-driven, step-by-step repair guides for every homeowner.</p>
+            </div>
+        </div>
+    </div>
 </div>

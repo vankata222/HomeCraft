@@ -4,6 +4,7 @@ using HomeCraft.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HomeCraft.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260202205644_Edited Reviews")]
+    partial class EditedReviews
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -100,7 +103,7 @@ namespace HomeCraft.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("HomeCraft.Data.Models.Comment", b =>
+            modelBuilder.Entity("HomeCraft.Data.Models.Review", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -112,6 +115,9 @@ namespace HomeCraft.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsLiked")
+                        .HasColumnType("bit");
+
                     b.Property<string>("TopicId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -122,11 +128,12 @@ namespace HomeCraft.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TopicId");
-
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments");
+                    b.HasIndex("TopicId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("HomeCraft.Data.Models.Topic", b =>
@@ -158,30 +165,6 @@ namespace HomeCraft.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Topics");
-                });
-
-            modelBuilder.Entity("HomeCraft.Data.Models.Vote", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("IsLiked")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("TopicId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TopicId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("Votes");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -321,10 +304,10 @@ namespace HomeCraft.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("HomeCraft.Data.Models.Comment", b =>
+            modelBuilder.Entity("HomeCraft.Data.Models.Review", b =>
                 {
                     b.HasOne("HomeCraft.Data.Models.Topic", "Topic")
-                        .WithMany("Comments")
+                        .WithMany("Reviews")
                         .HasForeignKey("TopicId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -349,17 +332,6 @@ namespace HomeCraft.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("HomeCraft.Data.Models.Vote", b =>
-                {
-                    b.HasOne("HomeCraft.Data.Models.Topic", "Topic")
-                        .WithMany("Votes")
-                        .HasForeignKey("TopicId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Topic");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -420,9 +392,7 @@ namespace HomeCraft.Migrations
 
             modelBuilder.Entity("HomeCraft.Data.Models.Topic", b =>
                 {
-                    b.Navigation("Comments");
-
-                    b.Navigation("Votes");
+                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }
