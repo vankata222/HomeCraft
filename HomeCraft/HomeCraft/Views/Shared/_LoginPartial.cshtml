@@ -9,6 +9,12 @@
         var user = await UserManager.GetUserAsync(User);
         var displayName = user?.FirstName ?? User.Identity?.Name;
 
+        <li class="nav-item d-flex align-items-center me-3">
+            <a class="nav-link text-dark position-relative" asp-area="" asp-controller="Topics" asp-action="MyFavorites" title="My Favorites">
+                <i class="bi bi-heart text-danger fs-5"></i>
+            </a>
+        </li>
+        
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle btn btn-light border-0 px-3 rounded-pill" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-person-circle me-1"></i> Hello, <strong>@displayName</strong>!

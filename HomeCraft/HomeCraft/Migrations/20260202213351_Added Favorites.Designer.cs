@@ -4,6 +4,7 @@ using HomeCraft.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HomeCraft.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260202213351_Added Favorites")]
+    partial class AddedFavorites
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -100,50 +103,6 @@ namespace HomeCraft.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("HomeCraft.Data.Models.Category", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Icon")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Categories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "cat-001-plumb",
-                            Icon = "bi-droplet-fill",
-                            Name = "Plumbing"
-                        },
-                        new
-                        {
-                            Id = "cat-002-elect",
-                            Icon = "bi-lightning-charge-fill",
-                            Name = "Electrical"
-                        },
-                        new
-                        {
-                            Id = "cat-003-carpt",
-                            Icon = "bi-hammer",
-                            Name = "Carpentry"
-                        },
-                        new
-                        {
-                            Id = "cat-004-paint",
-                            Icon = "bi-brush",
-                            Name = "Painting"
-                        });
-                });
-
             modelBuilder.Entity("HomeCraft.Data.Models.Comment", b =>
                 {
                     b.Property<string>("Id")
@@ -204,10 +163,6 @@ namespace HomeCraft.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("CategoryId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -228,8 +183,6 @@ namespace HomeCraft.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
 
                     b.HasIndex("UserId");
 
@@ -436,19 +389,11 @@ namespace HomeCraft.Migrations
 
             modelBuilder.Entity("HomeCraft.Data.Models.Topic", b =>
                 {
-                    b.HasOne("HomeCraft.Data.Models.Category", "Category")
-                        .WithMany("Topics")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("HomeCraft.Data.Models.ApplicationUser", "User")
                         .WithMany("Topics")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Category");
 
                     b.Navigation("User");
                 });
@@ -516,11 +461,6 @@ namespace HomeCraft.Migrations
                 });
 
             modelBuilder.Entity("HomeCraft.Data.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("Topics");
-                });
-
-            modelBuilder.Entity("HomeCraft.Data.Models.Category", b =>
                 {
                     b.Navigation("Topics");
                 });

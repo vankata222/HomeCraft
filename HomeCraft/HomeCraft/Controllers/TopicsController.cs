@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using HomeCraft.Data;
 using HomeCraft.Data.Models; 
-using HomeCraft.ViewModels.Topics; 
+using HomeCraft.ViewModels.Topics;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace HomeCraft.Controllers
 {
@@ -21,17 +22,34 @@ namespace HomeCraft.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? categoryId)
         {
-            var topics = await _context.Topics
-                .Include(t => t.Votes) 
-                .Include(t => t.Comments)
+            var query = _context.Topics
+                .Include(t => t.Category)
+                .Include(t => t.User)
+                .Include(t => t.Votes)
+                .Include(t => t.Favorites)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(categoryId))
+            {
+                query = query.Where(t => t.CategoryId == categoryId);
+            }
+
+            var topics = await query
+                .OrderByDescending(t => t.CreatedAt)
                 .Select(t => new TopicIndexViewModel
                 {
                     Topic = t,
                     LikeCount = t.Votes.Count(v => v.IsLiked),
-                    DislikeCount = t.Votes.Count(v => !v.IsLiked)
+                    DislikeCount = t.Votes.Count(v => !v.IsLiked),
+                    ShortDescription = t.Description.Length > 120 
+                        ? t.Description.Substring(0, 120) + "..." 
+                        : t.Description
                 }).ToListAsync();
+
+            ViewBag.Categories = await _context.Categories.OrderBy(c => c.Name).ToListAsync();
+            ViewBag.SelectedCategory = categoryId; 
 
             return View(topics);
         }
@@ -44,6 +62,8 @@ namespace HomeCraft.Controllers
             var topic = await _context.Topics
                 .Include(t => t.User)
                 .Include(t => t.Votes) 
+                .Include(t => t.Favorites)
+                .Include(t => t.Category)
                 .Include(t => t.Comments)
                     .ThenInclude(c => c.User) 
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -107,12 +127,27 @@ namespace HomeCraft.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create() => View();
+        public async Task<IActionResult> Create()
+        {
+            var categories = await _context.Categories.OrderBy(c => c.Name).ToListAsync();
+            ViewBag.Categories = new SelectList(categories, "Id", "Name");
+            return View();
+        }
 
         [HttpPost]
+        [Authorize] // This ensures the User object is populated
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(TopicCreateViewModel model)
         {
+            // Get the ID of the currently logged-in user
+            var userId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                // If for some reason the ID is missing, send them to login
+                return Challenge();
+            }
+
             if (ModelState.IsValid)
             {
                 var topic = new Topic
@@ -120,7 +155,8 @@ namespace HomeCraft.Controllers
                     Title = model.Title,
                     Description = model.Description,
                     MediaUrl = model.MediaUrl,
-                    UserId = _userManager.GetUserId(User), 
+                    CategoryId = model.CategoryId,
+                    UserId = userId, // <--- THIS MUST BE A VALID ID FROM AspNetUsers
                     CreatedAt = DateTime.Now
                 };
 
@@ -128,6 +164,8 @@ namespace HomeCraft.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name");
             return View(model);
         }
 
@@ -187,6 +225,40 @@ namespace HomeCraft.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> ToggleFavorite(string topicId)
+        {
+            var userId = _userManager.GetUserId(User);
+            var favorite = await _context.Favorites
+                .FirstOrDefaultAsync(f => f.TopicId == topicId && f.UserId == userId);
+
+            if (favorite == null)
+            {
+                _context.Favorites.Add(new Favorite { TopicId = topicId, UserId = userId });
+            }
+            else
+            {
+                _context.Favorites.Remove(favorite);
+            }
+
+            await _context.SaveChangesAsync();
+    
+            return Redirect(Request.Headers["Referer"].ToString());
+        }
+        [Authorize]
+        public async Task<IActionResult> MyFavorites()
+        {
+            var userId = _userManager.GetUserId(User);
+            var favoriteTopics = await _context.Favorites
+                .Where(f => f.UserId == userId)
+                .Include(f => f.Topic)
+                .ThenInclude(t => t.User)
+                .Select(f => f.Topic)
+                .ToListAsync();
+
+            return View(favoriteTopics);
         }
 
         private bool TopicExists(string id) => _context.Topics.Any(e => e.Id == id);

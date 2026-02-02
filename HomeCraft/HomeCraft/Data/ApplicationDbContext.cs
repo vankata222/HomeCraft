@@ -14,35 +14,37 @@ namespace HomeCraft.Data
         public DbSet<Topic> Topics { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Vote> Votes { get; set; }
+        
+        public DbSet<Favorite> Favorites { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            // This ensures one user can only have ONE vote per topic.
-            builder.Entity<Vote>()
-                .HasIndex(v => new { v.TopicId, v.UserId })
+            builder.Entity<Favorite>()
+                .HasIndex(f => new { f.UserId, f.TopicId })
                 .IsUnique();
 
-            // A Topic has many Comments
-            builder.Entity<Comment>()
-                .HasOne(c => c.Topic)
-                .WithMany(t => t.Comments)
-                .HasForeignKey(c => c.TopicId)
-                .OnDelete(DeleteBehavior.Cascade); // Delete comments if topic is deleted
-
-            // A Topic has many Votes
-            builder.Entity<Vote>()
-                .HasOne(v => v.Topic)
-                .WithMany(t => t.Votes)
-                .HasForeignKey(v => v.TopicId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Entity<Comment>()
-                .HasOne(c => c.User)
+            builder.Entity<Favorite>()
+                .HasOne(f => f.User)
                 .WithMany() 
-                .HasForeignKey(c => c.UserId)
-                .OnDelete(DeleteBehavior.NoAction); // Prevent multiple cascade paths
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.NoAction); 
+
+            builder.Entity<Favorite>()
+                .HasOne(f => f.Topic)
+                .WithMany(t => t.Favorites)
+                .HasForeignKey(f => f.TopicId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            // Seed Categories
+            builder.Entity<Category>().HasData(
+                new Category { Id = "cat-001-plumb", Name = "Plumbing", Icon = "bi-droplet-fill" },
+                new Category { Id = "cat-002-elect", Name = "Electrical", Icon = "bi-lightning-charge-fill" },
+                new Category { Id = "cat-003-carpt", Name = "Carpentry", Icon = "bi-hammer" },
+                new Category { Id = "cat-004-paint", Name = "Painting", Icon = "bi-brush" }
+            );
         }
     }
 }

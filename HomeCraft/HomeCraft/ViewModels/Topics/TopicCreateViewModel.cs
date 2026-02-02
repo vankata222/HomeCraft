@@ -4,12 +4,15 @@ namespace HomeCraft.ViewModels.Topics;
 
 public class TopicCreateViewModel
 {
-    [Required(ErrorMessage = "Please enter a title.")]
+    [Required]
     [StringLength(100)]
     public string Title { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Description is required.")]
+    [Required]
     public string Description { get; set; } = string.Empty;
 
     public string? MediaUrl { get; set; }
+
+    [Required(ErrorMessage = "Please select a category")]
+    public string CategoryId { get; set; } = string.Empty;
 }

@@ -22,14 +22,23 @@ namespace HomeCraft.Data.Models
 
 
         // The Author of the topic
+        [Required]
         public string UserId { get; set; } = string.Empty;
+
         [ForeignKey("UserId")]
         public virtual ApplicationUser? User { get; set; }
+        
+        public string CategoryId { get; set; }
+
+        [ForeignKey("CategoryId")]
+        public virtual Category? Category { get; set; }
 
         // The list of multiple comments
         public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
         // The list of unique votes
         public virtual ICollection<Vote> Votes { get; set; } = new List<Vote>();
+        
+        public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
     }
 }

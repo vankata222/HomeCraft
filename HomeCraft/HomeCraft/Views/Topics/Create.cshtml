@@ -1,65 +1,58 @@
 @model HomeCraft.ViewModels.Topics.TopicCreateViewModel
 
 @{
-    ViewData["Title"] = "New Repair Topic";
+    ViewData["Title"] = "Create New Repair Guide";
 }
 
-<div class="container py-5">
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg border-0 rounded-3">
-                @* Header with a nice success gradient or solid color *@
-                <div class="card-header bg-success text-white p-4">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-plus-square-dotted fs-1 me-3"></i>
-                        <div>
-                            <h3 class="mb-0 fw-bold">Post a New Topic</h3>
-                            <small class="text-white-50">Share your repair expertise with the community</small>
-                        </div>
-                    </div>
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-success text-white py-4 text-center">
+                    <h2 class="fw-bold mb-0">Share Your Knowledge</h2>
+                    <p class="mb-0 text-white-50">Help the community by posting a new repair topic</p>
                 </div>
-
                 <div class="card-body p-4 p-md-5">
                     <form asp-action="Create" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-3"></div>
 
-                        @* Title Field *@
                         <div class="mb-4">
-                            <label asp-for="Title" class="form-label fw-bold text-dark">Topic Title</label>
+                            <label asp-for="CategoryId" class="form-label fw-bold">Select Category</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-type"></i></span>
-                                <input asp-for="Title" class="form-control form-control-lg" placeholder="e.g., How to fix a leaky pipe" />
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-collection text-success"></i></span>
+                                <select asp-for="CategoryId" class="form-select border-start-0"
+                                        asp-items="@(ViewBag.Categories as SelectList)">
+                                    <option value="">-- Click to choose --</option>
+                                </select>
                             </div>
+                            <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Title" class="form-label fw-bold">Title</label>
+                            <input asp-for="Title" class="form-control" placeholder="e.g., Fixing a Leaky Kitchen Faucet" />
                             <span asp-validation-for="Title" class="text-danger small"></span>
                         </div>
 
-                        @* Description Field *@
                         <div class="mb-4">
-                            <label asp-for="Description" class="form-label fw-bold text-dark">Repair Instructions</label>
+                            <label asp-for="MediaUrl" class="form-label fw-bold">Image URL (Optional)</label>
+                            <input asp-for="MediaUrl" class="form-control" placeholder="https://image-hosting.com/my-repair.jpg" />
+                            <small class="text-muted">Direct link to an image that demonstrates the repair.</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-bold">Detailed Instructions</label>
                             <textarea asp-for="Description" class="form-control" rows="8"
-                                      placeholder="Provide a detailed, step-by-step guide..."></textarea>
+                                      placeholder="List the tools needed and step-by-step instructions..."></textarea>
                             <span asp-validation-for="Description" class="text-danger small"></span>
                         </div>
 
-                        @* Media URL Field *@
-                        <div class="mb-4">
-                            <label asp-for="MediaUrl" class="form-label fw-bold text-dark">Multimedia Link (Optional)</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-link-45deg"></i></span>
-                                <input asp-for="MediaUrl" class="form-control" placeholder="https://example.com/image.jpg" />
-                            </div>
-                            <div class="form-text mt-2">Paste a URL for an image or video to help others visualize the repair.</div>
-                            <span asp-validation-for="MediaUrl" class="text-danger small"></span>
-                        </div>
-
-                        @* Action Buttons *@
-                        <div class="d-grid gap-3 pt-3">
-                            <button type="submit" class="btn btn-success btn-lg shadow rounded-pill">
-                                <i class="bi bi-cloud-arrow-up-fill me-2"></i>Publish Topic
+                        <div class="d-flex gap-2 justify-content-end border-top pt-4">
+                            <a asp-action="Index" class="btn btn-light px-4 rounded-pill">Cancel</a>
+                            <button type="submit" class="btn btn-success px-5 rounded-pill shadow-sm">
+                                <i class="bi bi-send me-2"></i>Publish Topic
                             </button>
-                            <a asp-action="Index" class="btn btn-link text-decoration-none text-muted">
-                                <i class="bi bi-arrow-left me-1"></i>Cancel and return
-                            </a>
                         </div>
                     </form>
                 </div>
