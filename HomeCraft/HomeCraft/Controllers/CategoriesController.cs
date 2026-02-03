@@ -93,4 +93,38 @@ public class CategoriesController : Controller
         await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Manage));
     }
+    
+    // GET: Categories/Edit/5
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Edit(string id)
+    {
+        var category = await _context.Categories.FindAsync(id);
+        if (category == null) return NotFound();
+
+        return View(category);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(string id, [Bind("Id,Name,Icon")] Category category)
+    {
+        if (id != category.Id) return NotFound();
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                _context.Update(category);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Categories.Any(e => e.Id == category.Id)) return NotFound();
+                else throw;
+            }
+            return RedirectToAction(nameof(Manage));
+        }
+        return View(category);
+    }
 }
