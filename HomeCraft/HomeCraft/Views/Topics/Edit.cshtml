@@ -1,26 +1,35 @@
-@model HomeCraft.Data.Models.Topic
-
+@model HomeCraft.ViewModels.Topics.TopicEditViewModel
+@{
+    ViewData["Title"] = "Modify Your Topic";
+}
 <div class="container py-5">
+    <title>@ViewData["Title"]</title>
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-7">
             <div class="card shadow border-0">
                 <div class="card-header bg-warning text-dark py-3">
-                    <h4 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Modify Your Topic</h4>
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>@ViewData["Title"]</h4>
                 </div>
                 <div class="card-body p-4 p-md-5">
                     <form asp-action="Edit">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                        <input type="hidden" asp-for="Id" />
-                        <input type="hidden" asp-for="UserId" />
-                        <input type="hidden" asp-for="CreatedAt" />
+                        <input type="hidden" asp-for="Id"/>
+                        <input type="hidden" asp-for="UserId"/>
+                        <input type="hidden" asp-for="CreatedAt"/>
 
                         <div class="mb-4">
                             <label asp-for="Title" class="form-label fw-bold">Title</label>
-                            <input asp-for="Title" class="form-control form-control-lg" />
+                            <input asp-for="Title" class="form-control form-control-lg"/>
                             <span asp-validation-for="Title" class="text-danger small"></span>
                         </div>
-
+                        <div class="mb-4">
+                            <label asp-for="CategoryId" class="form-label fw-bold">Category</label>
+                            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
                         <div class="mb-4">
                             <label asp-for="Description" class="form-label fw-bold">Instructions</label>
                             <textarea asp-for="Description" class="form-control" rows="10"></textarea>
@@ -29,11 +38,11 @@
 
                         <div class="mb-5">
                             <label asp-for="MediaUrl" class="form-label fw-bold">Image URL</label>
-                            <input asp-for="MediaUrl" class="form-control" placeholder="https://..." />
+                            <input asp-for="MediaUrl" class="form-control" placeholder="https://..."/>
                             @if (!string.IsNullOrEmpty(Model.MediaUrl))
                             {
                                 <div class="mt-2 text-center">
-                                    <img src="@Model.MediaUrl" class="img-thumbnail" style="max-height: 200px;" />
+                                    <img src="@Model.MediaUrl" class="img-thumbnail" style="max-height: 200px;"/>
                                 </div>
                             }
                         </div>

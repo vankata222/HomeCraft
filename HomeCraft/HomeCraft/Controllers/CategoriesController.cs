@@ -22,8 +22,6 @@ public class CategoriesController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Index(string? categoryId)
     {
-        var userId = _userManager.GetUserId(User);
-
         var query = _context.Topics
             .Include(t => t.Category)
             .Include(t => t.Votes)
@@ -49,5 +47,50 @@ public class CategoriesController : Controller
         ViewBag.SelectedCategory = categoryId;
 
         return View(topics);
+    }
+
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Manage()
+    {
+        var categories = await _context.Categories
+            .Include(c => c.Topics)
+            .ToListAsync();
+        return View(categories);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Category category)
+    {
+        if (ModelState.IsValid)
+        {
+            _context.Categories.Add(category);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Manage));
+        }
+        return RedirectToAction(nameof(Manage));
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(string id)
+    {
+        var category = await _context.Categories
+            .Include(c => c.Topics)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (category == null) return NotFound();
+
+        if (category.Topics.Any())
+        {
+            TempData["Error"] = "Move topics to another category before deleting this one.";
+            return RedirectToAction(nameof(Manage));
+        }
+
+        _context.Categories.Remove(category);
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Manage));
     }
 }

@@ -60,16 +60,18 @@ namespace HomeCraft.Controllers
             if (id == null) return NotFound();
 
             var topic = await _context.Topics
-                .Include(t => t.User)
-                .Include(t => t.Votes) 
-                .Include(t => t.Favorites)
                 .Include(t => t.Category)
+                .Include(t => t.User)
                 .Include(t => t.Comments)
-                    .ThenInclude(c => c.User) 
+                .ThenInclude(c => c.User)
+                .Include(t => t.Votes)
+                .Include(t => t.Favorites)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (topic == null) return NotFound();
 
+            ViewBag.Categories = await _context.Categories.ToListAsync();
+            
             return View(topic);
         }
 
@@ -135,16 +137,13 @@ namespace HomeCraft.Controllers
         }
 
         [HttpPost]
-        [Authorize] // This ensures the User object is populated
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(TopicCreateViewModel model)
         {
-            // Get the ID of the currently logged-in user
             var userId = _userManager.GetUserId(User);
 
             if (string.IsNullOrEmpty(userId))
             {
-                // If for some reason the ID is missing, send them to login
                 return Challenge();
             }
 
@@ -156,7 +155,7 @@ namespace HomeCraft.Controllers
                     Description = model.Description,
                     MediaUrl = model.MediaUrl,
                     CategoryId = model.CategoryId,
-                    UserId = userId, // <--- THIS MUST BE A VALID ID FROM AspNetUsers
+                    UserId = userId, 
                     CreatedAt = DateTime.Now
                 };
 
@@ -169,6 +168,7 @@ namespace HomeCraft.Controllers
             return View(model);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
             var topic = await _context.Topics.FindAsync(id);
@@ -177,30 +177,58 @@ namespace HomeCraft.Controllers
             var currentUserId = _userManager.GetUserId(User);
             if (topic.UserId != currentUserId && !User.IsInRole("Admin")) return Forbid();
 
-            return View(topic);
+            var model = new TopicEditViewModel
+            {
+                Id = topic.Id,
+                Title = topic.Title,
+                Description = topic.Description,
+                MediaUrl = topic.MediaUrl,
+                CategoryId = topic.CategoryId,
+                UserId = topic.UserId, 
+                CreatedAt = topic.CreatedAt 
+            };
+
+            ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name", topic.CategoryId);
+            return View(model);
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,Title,Description,MediaUrl,UserId,CreatedAt")] Topic topic)
+        public async Task<IActionResult> Edit(string id, TopicEditViewModel model)
         {
-            if (id != topic.Id) return NotFound();
+            if (id != model.Id) return NotFound();
+
+            var topic = await _context.Topics.FindAsync(id);
+            if (topic == null) return NotFound();
+
+            var currentUserId = _userManager.GetUserId(User);
+            if (topic.UserId != currentUserId && !User.IsInRole("Admin")) 
+            {
+                return Forbid();
+            }
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    topic.Title = model.Title;
+                    topic.Description = model.Description;
+                    topic.MediaUrl = model.MediaUrl;
+                    topic.CategoryId = model.CategoryId;
+
                     _context.Update(topic);
                     await _context.SaveChangesAsync();
+            
+                    return RedirectToAction(nameof(Details), new { id = topic.Id });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!TopicExists(topic.Id)) return NotFound();
                     else throw;
                 }
-                return RedirectToAction(nameof(Index));
             }
-            return View(topic);
+
+            ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name", model.CategoryId);
+            return View(model);
         }
 
         public async Task<IActionResult> Delete(string id)
@@ -227,7 +255,6 @@ namespace HomeCraft.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> ToggleFavorite(string topicId)
         {
             var userId = _userManager.GetUserId(User);
@@ -247,7 +274,6 @@ namespace HomeCraft.Controllers
     
             return Redirect(Request.Headers["Referer"].ToString());
         }
-        [Authorize]
         public async Task<IActionResult> MyFavorites()
         {
             var userId = _userManager.GetUserId(User);
@@ -260,7 +286,18 @@ namespace HomeCraft.Controllers
 
             return View(favoriteTopics);
         }
-
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> MoveTopic(string topicId, string newCategoryId)
+        {
+            var topic = await _context.Topics.FindAsync(topicId);
+            if (topic != null)
+            {
+                topic.CategoryId = newCategoryId;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Details), new { id = topicId });
+        }
         private bool TopicExists(string id) => _context.Topics.Any(e => e.Id == id);
     }
 }

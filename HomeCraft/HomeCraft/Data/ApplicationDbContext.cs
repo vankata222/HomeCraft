@@ -14,7 +14,6 @@ namespace HomeCraft.Data
         public DbSet<Topic> Topics { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Vote> Votes { get; set; }
-        
         public DbSet<Favorite> Favorites { get; set; }
         public DbSet<Category> Categories { get; set; }
 

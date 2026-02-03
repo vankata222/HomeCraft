@@ -20,6 +20,19 @@
                 {
                     <img src="@Model.MediaUrl" class="card-img-top" style="max-height: 500px; object-fit: cover;" alt="Repair Main Image"/>
                 }
+                @if (User.IsInRole("Admin"))
+                {
+                    <div class="alert alert-secondary rounded-4 p-4 mt-4">
+                        <h6 class="fw-bold">Admin: Re-categorize this topic</h6>
+                        <form asp-action="MoveTopic" asp-controller="Topics" method="post" class="d-flex gap-2">
+                            <input type="hidden" name="topicId" value="@Model.Id" />
+                            <select name="newCategoryId" class="form-select w-auto"
+                                    asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))">
+                            </select>
+                            <button type="submit" class="btn btn-dark">Update Category</button>
+                        </form>
+                    </div>
+                }
                 
                 <div class="card-body p-5">
                     @* --- METADATA BAR --- *@
@@ -82,7 +95,7 @@
                     @* --- RATING BOX --- *@
                     <div class="card shadow-sm border-0 rounded-4 bg-light mb-5">
                         <div class="card-body p-4 text-center">
-                            <h5 class="fw-bold mb-3">Was this guide helpful?</h5>
+                            <h5 class="fw-bold mb-3">Was this topic helpful?</h5>
                             <div class="d-flex justify-content-center gap-3">
                                 <form asp-action="Rate" method="post">
                                     <input type="hidden" name="topicId" value="@Model.Id"/>
