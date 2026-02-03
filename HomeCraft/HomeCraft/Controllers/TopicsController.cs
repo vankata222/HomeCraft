@@ -298,6 +298,41 @@ namespace HomeCraft.Controllers
             }
             return RedirectToAction(nameof(Details), new { id = topicId });
         }
+        
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteComment(string commentId, string topicId)
+        {
+            var comment = await _context.Comments.FindAsync(commentId);
+    
+            if (comment == null)
+            {
+                return NotFound();
+            }
+
+            _context.Comments.Remove(comment);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Details), new { id = topicId });
+        }
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EditComment(string commentId, string topicId, string newContent)
+        {
+            var comment = await _context.Comments.FindAsync(commentId);
+    
+            if (comment == null) return NotFound();
+
+            if (!string.IsNullOrWhiteSpace(newContent))
+            {
+                comment.Content = newContent;
+                _context.Update(comment);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Details), new { id = topicId });
+        }
         private bool TopicExists(string id) => _context.Topics.Any(e => e.Id == id);
     }
 }
